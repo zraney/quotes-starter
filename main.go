@@ -22,12 +22,8 @@ var quotes = []quote{
 func getRandomQuote(c *gin.Context) {
 	randomIndex := rand.Intn(len(quotes))
 	pick := quotes[randomIndex]
-	c.IndentedJSON(http.StatusOK, pick)
+	c.JSON(http.StatusOK, pick)
 }
-
-// func getQuotes(c *gin.Context) {
-// 	c.IndentedJSON(http.StatusOK, quotes)
-// }
 
 func main() {
 	router := gin.Default()
