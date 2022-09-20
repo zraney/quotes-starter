@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type quote struct {
@@ -13,7 +14,7 @@ type quote struct {
 
 func main() {
 	router := gin.Default()
-	router.GET("/quote", getRandomQuote)
+	router.GET("/quotes", getRandomQuote)
 	router.Run("0.0.0.0:8080")
 }
 
