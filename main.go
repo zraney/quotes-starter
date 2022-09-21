@@ -16,10 +16,12 @@ type quote struct {
 func main() {
 	router := gin.Default()
 	router.GET("/quotes", getRandomQuote)
+	router.GET("quotes/:id", getQuoteByID)
 	router.Run("0.0.0.0:8080")
 
 }
 
+// TODO break this func into smaller, more focused funcs
 func getRandomQuote(c *gin.Context) {
 	keyArray := []string{}
 	for k, _ := range quotes {
@@ -29,6 +31,18 @@ func getRandomQuote(c *gin.Context) {
 	randomPick := keyArray[randomIndex]
 	randomQuote := quotes[randomPick]
 	c.JSON(http.StatusOK, randomQuote)
+}
+
+func getQuoteByID(c *gin.Context) {
+	id := c.Param("id")
+	quote, exists := quotes[id]
+
+	if exists {
+		c.JSON(http.StatusOK, quote)
+		return
+	}
+
+	c.JSON(http.StatusNotFound, gin.H{"message": "quote not found"})
 }
 
 var quotes = map[string]quote{
@@ -41,6 +55,6 @@ var quotes = map[string]quote{
 	"ca17bd05-4c0b-41ae-9496-518371e245f2": {ID: "ca17bd05-4c0b-41ae-9496-518371e245f2", Quote: "Make the zero value useful.", Author: "Rob Pike"},
 }
 
-func Add() {
-	//will use uuid.New().String() here to create the uuid only once and assign it to the quote at creation
-}
+// func Add() {
+// 	//will use uuid.New().String() here to create the uuid only once and assign it to the quote at creation
+// }
