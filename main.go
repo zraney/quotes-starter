@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type quote struct {
@@ -16,7 +17,8 @@ type quote struct {
 func main() {
 	router := gin.Default()
 	router.GET("/quotes", getRandomQuote)
-	router.GET("quotes/:id", getQuoteByID)
+	router.GET("/quotes/:id", getQuoteByID)
+	router.POST("/quotes", addNewQuote)
 	router.Run("0.0.0.0:8080")
 
 }
@@ -45,6 +47,20 @@ func getQuoteByID(c *gin.Context) {
 	c.JSON(http.StatusNotFound, gin.H{"message": "quote not found"})
 }
 
+func addNewQuote(c *gin.Context) {
+	newID := uuid.New().String()
+	var newQuote quote
+	newQuote.ID = newID
+
+	if err := c.BindJSON(&newQuote); err != nil {
+		return
+	}
+
+	quotes[newQuote.ID] = newQuote
+	c.JSON(http.StatusCreated, newQuote)
+
+}
+
 var quotes = map[string]quote{
 	"b37c9ded-d176-4fe5-a9b9-1427ebf92ed1": {ID: "b37c9ded-d176-4fe5-a9b9-1427ebf92ed1", Quote: "Errors are values.", Author: "Rob Pike"},
 	"0d95d2d8-28b0-4278-960d-cbdd16beab02": {ID: "0d95d2d8-28b0-4278-960d-cbdd16beab02", Quote: "Errors are values.", Author: "Rob Pike"},
@@ -54,7 +70,3 @@ var quotes = map[string]quote{
 	"ba9b4b54-3070-4665-bd29-de3e99c991d2": {ID: "ba9b4b54-3070-4665-bd29-de3e99c991d2", Quote: "interface{} says nothing.", Author: "Rob Pike"},
 	"ca17bd05-4c0b-41ae-9496-518371e245f2": {ID: "ca17bd05-4c0b-41ae-9496-518371e245f2", Quote: "Make the zero value useful.", Author: "Rob Pike"},
 }
-
-// func Add() {
-// 	//will use uuid.New().String() here to create the uuid only once and assign it to the quote at creation
-// }
