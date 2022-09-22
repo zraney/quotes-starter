@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type quote struct {
 
 func main() {
 	router := gin.Default()
+
 	router.GET("/quotes", getRandomQuote)
 	router.GET("/quotes/:id", getQuoteByID)
 	router.POST("/quotes", addNewQuote)
@@ -23,44 +25,63 @@ func main() {
 
 }
 
+func handleRequest(c *gin.Context) bool {
+	headers := c.Request.Header["X-Api-Key"]
+	return strings.Compare(headers[0], "COCKTAILSAUCE") == 0
+}
+
 // TODO break this func into smaller, more focused funcs
 func getRandomQuote(c *gin.Context) {
-	keyArray := []string{}
-	for k, _ := range quotes {
-		keyArray = append(keyArray, k)
+	if handleRequest(c) {
+		keyArray := []string{}
+		for k, _ := range quotes {
+			keyArray = append(keyArray, k)
+		}
+		randomIndex := rand.Intn(len(keyArray))
+		randomPick := keyArray[randomIndex]
+		randomQuote := quotes[randomPick]
+		c.JSON(http.StatusOK, randomQuote)
+		return
 	}
-	randomIndex := rand.Intn(len(keyArray))
-	randomPick := keyArray[randomIndex]
-	randomQuote := quotes[randomPick]
-	c.JSON(http.StatusOK, randomQuote)
+	c.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
 }
 
 func getQuoteByID(c *gin.Context) {
-	id := c.Param("id")
-	quote, exists := quotes[id]
+	if handleRequest(c) {
+		id := c.Param("id")
+		quote, exists := quotes[id]
 
-	if exists {
-		c.JSON(http.StatusOK, quote)
+		if exists {
+			c.JSON(http.StatusOK, quote)
+			return
+		}
+
+		c.JSON(http.StatusNotFound, gin.H{"message": "quote not found"})
 		return
 	}
+	c.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "quote not found"})
 }
 
 func addNewQuote(c *gin.Context) {
-	newID := uuid.New().String()
-	var newQuote quote
-	newQuote.ID = newID
+	if handleRequest(c) {
+		newID := uuid.New().String()
+		var newQuote quote
+		newQuote.ID = newID
 
-	if err := c.BindJSON(&newQuote); err != nil {
+		if err := c.BindJSON(&newQuote); err != nil {
+			return
+		}
+		if len(newQuote.Author) < 3 || len(newQuote.Quote) < 3 {
+			quotes[newQuote.ID] = newQuote
+			c.JSON(http.StatusNotFound, gin.H{"message": "quote and author must be greater than 3 characters"})
+			return
+		}
+		c.JSON(http.StatusCreated, newQuote.ID)
 		return
 	}
-	if len(newQuote.Author) < 3 || len(newQuote.Quote) < 3 {
-		quotes[newQuote.ID] = newQuote
-		c.JSON(http.StatusNotFound, gin.H{"message": "quote and author must be greater than 3 characters"})
-		return
-	}
-	c.JSON(http.StatusCreated, newQuote.ID)
+	c.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
+
 }
 
 var quotes = map[string]quote{
