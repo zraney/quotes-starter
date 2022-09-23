@@ -27,7 +27,10 @@ func main() {
 
 func handleRequest(c *gin.Context) bool {
 	headers := c.Request.Header["X-Api-Key"]
-	return strings.Compare(headers[0], "COCKTAILSAUCE") == 0
+	if headers != nil {
+		return strings.Compare(headers[0], "COCKTAILSAUCE") == 0
+	}
+	return false
 }
 
 // TODO break this func into smaller, more focused funcs
