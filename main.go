@@ -72,12 +72,12 @@ func addNewQuote(c *gin.Context) {
 		if err := c.BindJSON(&newQuote); err != nil {
 			return
 		}
-		if len(newQuote.Author) < 3 || len(newQuote.Quote) < 3 {
+		if len(newQuote.Author) >= 3 || len(newQuote.Quote) >= 3 {
 			quotes[newQuote.ID] = newQuote
-			c.JSON(http.StatusNotFound, gin.H{"message": "quote and author must be greater than 3 characters"})
+			c.JSON(http.StatusCreated, newQuote.ID)
 			return
 		}
-		c.JSON(http.StatusCreated, newQuote.ID)
+		c.JSON(http.StatusNotFound, gin.H{"message": "quote and author must be greater than 3 characters"})
 		return
 	}
 	c.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
