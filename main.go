@@ -72,7 +72,7 @@ func addNewQuote(c *gin.Context) {
 		if err := c.BindJSON(&newQuote); err != nil {
 			return
 		}
-		if len(newQuote.Author) >= 3 || len(newQuote.Quote) >= 3 {
+		if len(newQuote.Author) >= 3 && len(newQuote.Quote) >= 3 {
 			quotes[newQuote.ID] = newQuote
 			c.JSON(http.StatusCreated, newQuote.ID)
 			return
