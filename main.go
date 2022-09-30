@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -72,21 +71,35 @@ func handleRequest(c *gin.Context) bool {
 	return false
 }
 
-// TODO break this func into smaller, more focused funcs
 func getRandomQuote(c *gin.Context) {
 	if handleRequest(c) {
-		keyArray := []string{}
-		for k, _ := range quotes {
-			keyArray = append(keyArray, k)
+		row := db.QueryRow("SELECT id, phrase, author FROM quotes ORDER BY RANDOM() LIMIT 1")
+		quote := &Quote{}
+		err := row.Scan(&quote.ID, &quote.Quote, &quote.Author)
+		if err != nil {
+			log.Println(err)
 		}
-		randomIndex := rand.Intn(len(keyArray))
-		randomPick := keyArray[randomIndex]
-		randomQuote := quotes[randomPick]
-		c.JSON(http.StatusOK, randomQuote)
+		c.JSON(http.StatusOK, quote)
 		return
 	}
 	c.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
 }
+
+// TODO break this func into smaller, more focused funcs
+// func getRandomQuote(c *gin.Context) {
+// 	if handleRequest(c) {
+// 		keyArray := []string{}
+// 		for k, _ := range quotes {
+// 			keyArray = append(keyArray, k)
+// 		}
+// 		randomIndex := rand.Intn(len(keyArray))
+// 		randomPick := keyArray[randomIndex]
+// 		randomQuote := quotes[randomPick]
+// 		c.JSON(http.StatusOK, randomQuote)
+// 		return
+// 	}
+// 	c.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
+// }
 
 // TODO auth and invalid id not working
 // .query may return 2 variables
