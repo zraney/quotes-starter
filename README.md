@@ -35,3 +35,14 @@ gcloud config set project name-apprentice
 ```shell
 gcloud run deploy
 ```
+
+- Commands for setting up Artifact Registry and then pushing container image to it.
+Go to gcloud console and add new AR repo. Then run the following: 
+
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+docker build -t container_reg_url/seafood:latest -f Dockerfile
+
+docker push container_reg_url/seafood:latest
+
+gcloud run deploy --image container_reg_url/seafood:latest
