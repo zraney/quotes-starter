@@ -1,0 +1,9 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Quote {
+  id: ID!
+  quote: String!
+  author: String!
+}
