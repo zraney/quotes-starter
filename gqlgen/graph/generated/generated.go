@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -177,9 +178,9 @@ type Quote {
 }
 
  type Query {
-  randomQuote: Quote
+  randomQuote: Quote!
 
-  quoteByID(id: String): Quote
+  quoteByID(id: String): Quote!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -277,11 +278,14 @@ func (ec *executionContext) _Query_randomQuote(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.Quote)
 	fc.Result = res
-	return ec.marshalOQuote2ᚖgithubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx, field.Selections, res)
+	return ec.marshalNQuote2ᚖgithubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_randomQuote(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -326,11 +330,14 @@ func (ec *executionContext) _Query_quoteByID(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.Quote)
 	fc.Result = res
-	return ec.marshalOQuote2ᚖgithubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx, field.Selections, res)
+	return ec.marshalNQuote2ᚖgithubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_quoteByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2436,6 +2443,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_randomQuote(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -2456,6 +2466,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_quoteByID(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -2864,6 +2877,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNQuote2githubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx context.Context, sel ast.SelectionSet, v model.Quote) graphql.Marshaler {
+	return ec._Quote(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNQuote2ᚖgithubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx context.Context, sel ast.SelectionSet, v *model.Quote) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Quote(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3156,13 +3183,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOQuote2ᚖgithubᚗcomᚋzraneyᚋquotesᚑstarterᚋgqlgenᚋgraphᚋmodelᚐQuote(ctx context.Context, sel ast.SelectionSet, v *model.Quote) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Quote(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
