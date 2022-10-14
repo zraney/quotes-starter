@@ -9,5 +9,7 @@ type Quote {
 }
 
  type Query {
-  getRandomQuote: Quote
+  randomQuote: Quote
+
+  quoteByID(id: String): Quote
 }
