@@ -3,7 +3,11 @@
 # https://gqlgen.com/getting-started/
 
 type Quote {
-  id: ID!
+  id: String!
   quote: String!
   author: String!
+}
+
+ type Query {
+  getRandomQuote: Quote
 }
