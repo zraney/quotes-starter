@@ -3,21 +3,23 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-
-	_ "github.com/99designs/gqlgen"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 type Quote struct {
 	ID     string `json:"id"`
 	Quote  string `json:"quote,omitempty"`
 	Author string `json:"author,omitempty"`
+}
+
+type ID struct {
+	ID string `json:"id"`
 }
 
 var db *sql.DB
@@ -94,6 +96,9 @@ func getQuoteByID(c *gin.Context) {
 		if err != nil {
 			log.Println(err)
 		}
+		fmt.Print("quote.id below")
+		fmt.Println(quote.ID)
+		fmt.Print(id)
 		if quote.ID != "" {
 			c.JSON(http.StatusOK, quote)
 			return
@@ -106,19 +111,16 @@ func getQuoteByID(c *gin.Context) {
 
 func addNewQuote(c *gin.Context) {
 	if handleRequest(c) {
-		newID := uuid.New().String()
+		var newID ID
+		newID.ID = uuid.New().String()
 		var newQuote Quote
-		newQuote.ID = newID
 
 		if err := c.BindJSON(&newQuote); err != nil {
 			return
 		}
-		id := newQuote.ID
+		id := newID.ID
 		phrase := newQuote.Quote
 		author := newQuote.Author
-		returnId := Quote{
-			ID: newQuote.ID,
-		}
 
 		if len(author) >= 3 && len(phrase) >= 3 {
 			_, err := db.Exec(fmt.Sprintf("INSERT INTO quotes (id, phrase, author) VALUES ('%s', '%s', '%s');", id, phrase, author))
@@ -127,7 +129,7 @@ func addNewQuote(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"message": err})
 				return
 			}
-			c.JSON(http.StatusCreated, returnId)
+			c.JSON(http.StatusCreated, newID)
 			return
 		}
 		c.JSON(http.StatusBadRequest, gin.H{"message": "quote and author must be greater than 3 characters"})

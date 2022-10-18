@@ -4,14 +4,58 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/zraney/quotes-starter/gqlgen/graph/generated"
 	"github.com/zraney/quotes-starter/gqlgen/graph/model"
 )
+
+// NewQuote is the resolver for the newQuote field.
+func (r *mutationResolver) NewQuote(ctx context.Context, input model.QuoteInput) (*model.Response, error) {
+	quote := &model.Quote{
+		Quote:  input.Quote,
+		Author: input.Author,
+	}
+
+	marshalledData, err := json.Marshal(quote)
+	if err != nil {
+		return nil, err
+	}
+	b := bytes.NewBuffer(marshalledData)
+
+	request, requestErr := http.NewRequest("POST", "http://34.149.8.254/quotes/", b)
+	request.Header.Set("x-api-key", "COCKTAILSAUCE")
+
+	if requestErr != nil {
+		return nil, requestErr
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	responseData, responseDataErr := ioutil.ReadAll(resp.Body)
+	if responseDataErr != nil {
+		return nil, responseDataErr
+	}
+
+	spew.Dump(responseData)
+
+	var responseObject model.Response
+	json.Unmarshal(responseData, &responseObject)
+	fmt.Print(responseObject)
+
+	return &responseObject, nil
+}
 
 // RandomQuote is the resolver for the randomQuote field.
 func (r *queryResolver) RandomQuote(ctx context.Context) (*model.Quote, error) {
@@ -58,7 +102,11 @@ func (r *queryResolver) QuoteByID(ctx context.Context, id *string) (*model.Quote
 	return &responseObject, nil
 }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
