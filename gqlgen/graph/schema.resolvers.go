@@ -54,7 +54,6 @@ func (r *mutationResolver) NewQuote(ctx context.Context, input model.QuoteInput)
 
 // DeleteQuote is the resolver for the deleteQuote field.
 func (r *mutationResolver) DeleteQuote(ctx context.Context, id string) (*string, error) {
-
 	requestUrl := "http://34.149.8.254/quotes/" + id
 	request, err := http.NewRequest("DELETE", requestUrl, nil)
 	request.Header.Set("x-api-key", "COCKTAILSAUCE")
@@ -91,8 +90,8 @@ func (r *queryResolver) RandomQuote(ctx context.Context) (*model.Quote, error) {
 }
 
 // QuoteByID is the resolver for the quoteByID field.
-func (r *queryResolver) QuoteByID(ctx context.Context, id string) (*model.Quote, error) {
-	requestUrl := "http://34.149.8.254/quotes/" + id
+func (r *queryResolver) QuoteByID(ctx context.Context, id *string) (*model.Quote, error) {
+	requestUrl := "http://34.149.8.254/quotes/" + *id
 	request, err := http.NewRequest("GET", requestUrl, nil)
 	request.Header.Set("x-api-key", "COCKTAILSAUCE")
 

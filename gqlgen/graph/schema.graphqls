@@ -20,7 +20,7 @@ type Response {
   randomQuote: Quote!
   
   # query for getting a specific quote by id
-  quoteByID(id: String!): Quote!
+  quoteByID(id: String): Quote!
 }
 
 input QuoteInput {

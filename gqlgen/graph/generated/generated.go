@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		QuoteByID   func(childComplexity int, id string) int
+		QuoteByID   func(childComplexity int, id *string) int
 		RandomQuote func(childComplexity int) int
 	}
 
@@ -71,7 +71,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	RandomQuote(ctx context.Context) (*model.Quote, error)
-	QuoteByID(ctx context.Context, id string) (*model.Quote, error)
+	QuoteByID(ctx context.Context, id *string) (*model.Quote, error)
 }
 
 type executableSchema struct {
@@ -123,7 +123,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.QuoteByID(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.QuoteByID(childComplexity, args["id"].(*string)), true
 
 	case "Query.randomQuote":
 		if e.complexity.Query.RandomQuote == nil {
@@ -251,7 +251,7 @@ type Response {
   randomQuote: Quote!
   
   # query for getting a specific quote by id
-  quoteByID(id: String!): Quote!
+  quoteByID(id: String): Quote!
 }
 
 input QuoteInput {
@@ -323,10 +323,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_quoteByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -550,7 +550,7 @@ func (ec *executionContext) _Query_quoteByID(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().QuoteByID(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().QuoteByID(rctx, fc.Args["id"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
