@@ -3,18 +3,36 @@
 # https://gqlgen.com/getting-started/
 
 type Quote {
-  #id of quote
-  id: String!
-  #quote body
+  # id of quote
+  id: ID!
+  # quote body
   quote: String!
-  #author of quote
+  # author of quote
   author: String!
+}
+
+type Response {
+  id: ID!
 }
 
  type Query {
   # query for getting a random quote
   randomQuote: Quote!
+  
   # query for getting a specific quote by id
   quoteByID(id: String): Quote!
+}
+
+input QuoteInput {
+  quote: String!
+  author: String!
+}
+
+type Mutation {
+  # add new quote
+  newQuote(input: QuoteInput!): Response!
+
+  # delete quote by id
+  deleteQuote(id: String!): String
 }
 
