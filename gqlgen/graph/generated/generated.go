@@ -249,7 +249,6 @@ type Response {
  type Query {
   # query for getting a random quote
   randomQuote: Quote!
-  
   # query for getting a specific quote by id
   quoteByID(id: String): Quote!
 }
@@ -262,7 +261,6 @@ input QuoteInput {
 type Mutation {
   # add new quote
   newQuote(input: QuoteInput!): Response!
-
   # delete quote by id
   deleteQuote(id: String!): String
 }
