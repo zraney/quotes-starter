@@ -45,11 +45,12 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		NewQuote func(childComplexity int, input model.QuoteInput) int
+		DeleteQuote func(childComplexity int, id string) int
+		NewQuote    func(childComplexity int, input model.QuoteInput) int
 	}
 
 	Query struct {
-		QuoteByID   func(childComplexity int, id *string) int
+		QuoteByID   func(childComplexity int, id string) int
 		RandomQuote func(childComplexity int) int
 	}
 
@@ -66,10 +67,11 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	NewQuote(ctx context.Context, input model.QuoteInput) (*model.Response, error)
+	DeleteQuote(ctx context.Context, id string) (*string, error)
 }
 type QueryResolver interface {
 	RandomQuote(ctx context.Context) (*model.Quote, error)
-	QuoteByID(ctx context.Context, id *string) (*model.Quote, error)
+	QuoteByID(ctx context.Context, id string) (*model.Quote, error)
 }
 
 type executableSchema struct {
@@ -86,6 +88,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.deleteQuote":
+		if e.complexity.Mutation.DeleteQuote == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteQuote_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteQuote(childComplexity, args["id"].(string)), true
 
 	case "Mutation.newQuote":
 		if e.complexity.Mutation.NewQuote == nil {
@@ -109,7 +123,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.QuoteByID(childComplexity, args["id"].(*string)), true
+		return e.complexity.Query.QuoteByID(childComplexity, args["id"].(string)), true
 
 	case "Query.randomQuote":
 		if e.complexity.Query.RandomQuote == nil {
@@ -235,8 +249,9 @@ type Response {
  type Query {
   # query for getting a random quote
   randomQuote: Quote!
+  
   # query for getting a specific quote by id
-  quoteByID(id: String): Quote!
+  quoteByID(id: String!): Quote!
 }
 
 input QuoteInput {
@@ -247,6 +262,9 @@ input QuoteInput {
 type Mutation {
   # add new quote
   newQuote(input: QuoteInput!): Response!
+
+  # delete quote by id
+  deleteQuote(id: String!): String
 }
 
 `, BuiltIn: false},
@@ -256,6 +274,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_deleteQuote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_newQuote_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -290,10 +323,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_quoteByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -399,6 +432,58 @@ func (ec *executionContext) fieldContext_Mutation_newQuote(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_deleteQuote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteQuote(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteQuote(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteQuote(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteQuote_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_randomQuote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_randomQuote(ctx, field)
 	if err != nil {
@@ -465,7 +550,7 @@ func (ec *executionContext) _Query_quoteByID(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().QuoteByID(rctx, fc.Args["id"].(*string))
+		return ec.resolvers.Query().QuoteByID(rctx, fc.Args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2664,6 +2749,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "deleteQuote":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteQuote(ctx, field)
+			})
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

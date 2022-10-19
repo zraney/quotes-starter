@@ -7,11 +7,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/zraney/quotes-starter/gqlgen/graph/generated"
 	"github.com/zraney/quotes-starter/gqlgen/graph/model"
 )
@@ -54,6 +52,22 @@ func (r *mutationResolver) NewQuote(ctx context.Context, input model.QuoteInput)
 	return &responseObject, nil
 }
 
+// DeleteQuote is the resolver for the deleteQuote field.
+func (r *mutationResolver) DeleteQuote(ctx context.Context, id string) (*string, error) {
+
+	requestUrl := "http://34.149.8.254/quotes/" + id
+	request, err := http.NewRequest("DELETE", requestUrl, nil)
+	request.Header.Set("x-api-key", "COCKTAILSAUCE")
+
+	if err != nil {
+		return nil, err
+	}
+	client := &http.Client{}
+	resp, err := client.Do(request)
+
+	return &resp.Status, nil
+}
+
 // RandomQuote is the resolver for the randomQuote field.
 func (r *queryResolver) RandomQuote(ctx context.Context) (*model.Quote, error) {
 	request, err := http.NewRequest("GET", "http://34.149.8.254/quotes/", nil)
@@ -77,8 +91,8 @@ func (r *queryResolver) RandomQuote(ctx context.Context) (*model.Quote, error) {
 }
 
 // QuoteByID is the resolver for the quoteByID field.
-func (r *queryResolver) QuoteByID(ctx context.Context, id *string) (*model.Quote, error) {
-	requestUrl := "http://34.149.8.254/quotes/" + *id
+func (r *queryResolver) QuoteByID(ctx context.Context, id string) (*model.Quote, error) {
+	requestUrl := "http://34.149.8.254/quotes/" + id
 	request, err := http.NewRequest("GET", requestUrl, nil)
 	request.Header.Set("x-api-key", "COCKTAILSAUCE")
 
