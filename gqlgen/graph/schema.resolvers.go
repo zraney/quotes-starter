@@ -28,7 +28,8 @@ func (r *mutationResolver) NewQuote(ctx context.Context, input model.QuoteInput)
 	b := bytes.NewBuffer(marshalledData)
 
 	request, requestErr := http.NewRequest("POST", "http://34.149.8.254/quotes/", b)
-	request.Header.Set("x-api-key", "COCKTAILSAUCE")
+	key := ctx.Value("x-api-key").(string)
+	request.Header.Set("x-api-key", key)
 
 	if requestErr != nil {
 		return nil, requestErr
@@ -56,7 +57,8 @@ func (r *mutationResolver) NewQuote(ctx context.Context, input model.QuoteInput)
 func (r *mutationResolver) DeleteQuote(ctx context.Context, id string) (*string, error) {
 	requestUrl := "http://34.149.8.254/quotes/" + id
 	request, err := http.NewRequest("DELETE", requestUrl, nil)
-	request.Header.Set("x-api-key", "COCKTAILSAUCE")
+	key := ctx.Value("x-api-key").(string)
+	request.Header.Set("x-api-key", key)
 
 	if err != nil {
 		return nil, err
@@ -70,7 +72,8 @@ func (r *mutationResolver) DeleteQuote(ctx context.Context, id string) (*string,
 // RandomQuote is the resolver for the randomQuote field.
 func (r *queryResolver) RandomQuote(ctx context.Context) (*model.Quote, error) {
 	request, err := http.NewRequest("GET", "http://34.149.8.254/quotes/", nil)
-	request.Header.Set("x-api-key", "COCKTAILSAUCE")
+	key := ctx.Value("x-api-key").(string)
+	request.Header.Set("x-api-key", key)
 
 	if err != nil {
 		return nil, err
@@ -93,7 +96,8 @@ func (r *queryResolver) RandomQuote(ctx context.Context) (*model.Quote, error) {
 func (r *queryResolver) QuoteByID(ctx context.Context, id *string) (*model.Quote, error) {
 	requestUrl := "http://34.149.8.254/quotes/" + *id
 	request, err := http.NewRequest("GET", requestUrl, nil)
-	request.Header.Set("x-api-key", "COCKTAILSAUCE")
+	key := ctx.Value("x-api-key").(string)
+	request.Header.Set("x-api-key", key)
 
 	if err != nil {
 		return nil, err
