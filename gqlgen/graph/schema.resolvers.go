@@ -48,11 +48,8 @@ func (r *mutationResolver) NewQuote(ctx context.Context, input model.QuoteInput)
 		return nil, responseDataErr
 	}
 
-	spew.Dump(responseData)
-
 	var responseObject model.Response
 	json.Unmarshal(responseData, &responseObject)
-	fmt.Print(responseObject)
 
 	return &responseObject, nil
 }

@@ -96,9 +96,7 @@ func getQuoteByID(c *gin.Context) {
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Print("quote.id below")
-		fmt.Println(quote.ID)
-		fmt.Print(id)
+
 		if quote.ID != "" {
 			c.JSON(http.StatusOK, quote)
 			return
